@@ -3,7 +3,7 @@
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import Any, List, Optional, Sequence
 from urllib.parse import quote
 from uuid import uuid4
 
@@ -11,9 +11,6 @@ from filemaker_odata.errors import FileMakerError
 from filemaker_odata.operations.base import FileMakerConfig
 from filemaker_odata.operations.builder import OperationBuilder
 from filemaker_odata.request import RequestProtocol
-
-OrderClause = Tuple[str, str]
-OrderBy = Union[OrderClause, Sequence[OrderClause]]
 
 _COUNT_PATTERN = re.compile(r"^\d+$")
 _BOUNDARY_PATTERN = re.compile(r"boundary=(.+?)\r\n")
@@ -55,7 +52,7 @@ def _parameterize(
         params["$filter"] = filter
     if expand is not None:
         params["$expand"] = expand
-    if order_by is not None:
+    if order_by:
         clauses = (
             order_by
             if len(order_by) and isinstance(order_by[0], (list, tuple))

@@ -264,6 +264,27 @@ def test_crossjoin_builds_url():
     assert fm.crossjoin(tables=["people", "orders"]) == {"value": []}
 
 
+def test_get_record_with_options():
+    fm, request = fixtures()
+    request.mock(
+        type="GET",
+        url=fm.url('people(\'1234\')?$select="NAME"&$expand=orders&$format=application/json'),
+        data={"NAME": "Fede"},
+    )
+    assert fm.get_record("people", "1234", select=["NAME"], expand="orders")["NAME"] == "Fede"
+
+
+def test_crossjoin_with_filter():
+    fm, request = fixtures()
+    request.mock(
+        type="GET",
+        url=fm.url("$crossjoin(people,orders)?$filter=people/ID eq orders/PID&$format=application/json"),
+        data={"value": [{"x": 1}]},
+    )
+    result = fm.crossjoin(tables=["people", "orders"], filter="people/ID eq orders/PID")
+    assert result["value"][0]["x"] == 1
+
+
 def test_script_success():
     fm, request = fixtures()
     request.mock(
