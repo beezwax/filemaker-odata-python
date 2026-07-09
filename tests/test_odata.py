@@ -37,6 +37,10 @@ class TestNumber:
         with pytest.raises(TypeError, match="Invalid OData number"):
             odata.number(value)
 
+    def test_preserves_large_integer_precision(self):
+        assert odata.number(9007199254740993) == "9007199254740993"
+        assert odata.number("9007199254740993") == "9007199254740993"
+
 
 class TestInteger:
     def test_accepts_integers(self):
@@ -47,6 +51,9 @@ class TestInteger:
     def test_rejects_non_integers(self, value):
         with pytest.raises(TypeError, match="Invalid OData integer"):
             odata.integer(value)
+
+    def test_preserves_large_integer_precision(self):
+        assert odata.integer(9007199254740993) == "9007199254740993"
 
 
 class TestBoolean:

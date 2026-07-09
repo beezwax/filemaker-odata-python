@@ -16,12 +16,11 @@ _UUID_PATTERN = re.compile(
 _IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z0-9 _-]+$")
 
 
-def _num_to_str(value: float) -> str:
-    """Mirror JavaScript ``String(Number(...))``: integral floats lose the ``.0``."""
-    number = float(value)
-    if number.is_integer():
-        return str(int(number))
-    return str(number)
+def _float_to_str(value: float) -> str:
+    """Mirror JavaScript String() for floats: integral floats lose the .0."""
+    if value.is_integer():
+        return str(int(value))
+    return str(value)
 
 
 def string(value) -> str:
@@ -33,27 +32,36 @@ def string(value) -> str:
 def number(value) -> str:
     if isinstance(value, bool):
         raise TypeError("Invalid OData number")
-    if isinstance(value, (int, float)):
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
         if not math.isfinite(value):
             raise TypeError("Invalid OData number")
-        return _num_to_str(value)
+        return _float_to_str(value)
     if not isinstance(value, str):
         raise TypeError("Invalid OData number")
     normalized = value.strip()
     if not _NUMBER_PATTERN.match(normalized):
         raise TypeError("Invalid OData number")
+    if _INTEGER_PATTERN.match(normalized):
+        return str(int(normalized))  # preserve integer precision
     parsed = float(normalized)
     if not math.isfinite(parsed):
         raise TypeError("Invalid OData number")
-    return _num_to_str(parsed)
+    return _float_to_str(parsed)
 
 
 def integer(value) -> str:
     if isinstance(value, bool):
         raise TypeError("Invalid OData integer")
-    if not isinstance(value, (int, float, str)):
+    if isinstance(value, int):
+        normalized = str(value)
+    elif isinstance(value, float):
+        normalized = _float_to_str(value)
+    elif isinstance(value, str):
+        normalized = value.strip()
+    else:
         raise TypeError("Invalid OData integer")
-    normalized = _num_to_str(value) if isinstance(value, (int, float)) else value.strip()
     if not _INTEGER_PATTERN.match(normalized):
         raise TypeError("Invalid OData integer")
     return normalized
