@@ -58,3 +58,16 @@ and `client.get_auth_types()`.
 
 The library logs at DEBUG under the `filemaker_odata` logger and is silent by
 default. Inject a custom `logging.Logger` via `FileMakerClient(..., logger=...)`.
+
+## Development
+
+This project uses [uv](https://docs.astral.sh/uv/). `uv run` syncs the
+environment (Python + dependencies from `uv.lock`) before running, so no
+separate install step is needed.
+
+```bash
+uv sync                 # create the venv and install deps (optional; uv run does this)
+uv run pytest           # run the full test suite
+uv run pytest -q        # quiet output
+uv run pytest tests/test_filemaker.py -v   # run one file, verbose
+```
