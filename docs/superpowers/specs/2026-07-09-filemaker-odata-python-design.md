@@ -31,7 +31,13 @@ Source of truth for behavior: the existing TS library at
    (silent unless the app configures logging).
 5. **Drop `mergeDeep`.** httpx merges request/client headers natively, so the TS
    `mergeDeep` helper and its tests are not ported.
-6. **uv for tooling.** `uv` manages the Python toolchain and dependencies.
+6. **Drop `FileMakerAuthenticator`.** The TS class is `@deprecated` and never used
+   internally (only re-exported). Its auth-type and OAuth-URL features are already
+   provided by `FileMakerClient` (`get_auth_types()`, `get_oauth_url()`). Its only
+   unique methods — `get_token_using_oauth` / `get_token_using_credentials` — hit
+   the FileMaker **Data API** (`/fmi/data/...`) to mint session tokens, which the
+   OData client never uses. So it is not ported.
+7. **uv for tooling.** `uv` manages the Python toolchain and dependencies.
 
 ## Tooling & dependencies
 
@@ -55,7 +61,6 @@ filemaker-odata-python/
     credentials.py        # Credentials protocol + Basic/OAuth/Raw/Null
     request.py            # Request (httpx), RequestError, Response
     odata.py              # escaping helpers
-    authenticator.py      # deprecated FileMakerAuthenticator (Data API sessions)
     operations/
       __init__.py
       base.py             # BatchOperation protocol, BatchOperationResponse
@@ -181,11 +186,9 @@ Constructor: `FileMakerClient(server, database, *, http_client=None, logger=None
 
 ### `authenticator.py` — deprecated
 
-Port of `FileMakerAuthenticator` (FileMaker Data API sessions, not OData), marked
-deprecated (docstring + `warnings.warn(DeprecationWarning)`), kept for parity:
-`get_auth_type`, `get_oauth_url`, `get_token_using_oauth`,
-`get_token_using_credentials`. Uses the Data API base URL
-`https://{server}/fmi/data/vLatest/databases/{database}/`.
+Not ported. See decision 6: `FileMakerClient` already provides `get_auth_types()`
+and `get_oauth_url()`; the class's remaining Data API session-token methods are
+outside this OData client's scope.
 
 ### `odata.py` — escaping helpers
 
@@ -209,9 +212,8 @@ namespace/module) so callers can write `odata.string(...)`.
 ### `__init__.py` — public exports
 
 Exports `FileMakerClient`, `FileMaker`, credentials classes, `Request`,
-`RequestError`, `FileMakerError`, the `odata` helpers, `FileMakerAuthenticator`,
-and the result dataclasses (`RecordsWithCount`, `ScriptResult`, `OAuthUrl`,
-`BatchOperationResponse`).
+`RequestError`, `FileMakerError`, the `odata` helpers, and the result dataclasses
+(`RecordsWithCount`, `ScriptResult`, `OAuthUrl`, `BatchOperationResponse`).
 
 ## Error handling
 
@@ -238,6 +240,7 @@ pytest suite mirroring `tests/filemaker.test.ts`:
 ## Out of scope
 
 - Async API (`AsyncFileMaker`).
+- `FileMakerAuthenticator` / FileMaker Data API session tokens (see decision 6).
 - A `find` batch operation (the TS code notes this is intentionally unimplemented).
 - Publishing to PyPI / packaging distribution config beyond a working
   `pyproject.toml`.
