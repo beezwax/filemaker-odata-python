@@ -183,6 +183,16 @@ def test_get_records_with_count_defaults_zero():
     assert fm.get_records_with_count("people", top=1).count == 0
 
 
+def test_get_records_with_count_null_odata_count_falls_back():
+    fm, request = fixtures()
+    request.mock(
+        type="GET",
+        url=fm.url("people?$top=1&$count=true&$format=application/json"),
+        data={"@odata.count": None, "@count": 7, "value": [{"ID": "1"}]},
+    )
+    assert fm.get_records_with_count("people", top=1).count == 7
+
+
 def test_count_records_endpoint_and_response_type():
     fm, request = fixtures()
     request.mock(type="GET", url=fm.url("people/$count"), data="29")

@@ -142,7 +142,11 @@ class FileMaker:
         )
         url = f"{self.url(table)}?{params}"
         data = self._request.get(url).data
-        count = data.get("@odata.count", data.get("@count", 0))
+        count = data.get("@odata.count")
+        if count is None:
+            count = data.get("@count")
+        if count is None:
+            count = 0
         return RecordsWithCount(data=data["value"], count=count)
 
     def count_records(self, table: str, *, filter=None) -> int:

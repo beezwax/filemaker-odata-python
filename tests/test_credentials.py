@@ -31,3 +31,9 @@ def test_oauth_credentials_emit_fm_headers():
 def test_raw_credentials_pass_through_authorization():
     creds = RawCredentials("Basic abc123")
     assert creds.authorization_headers == {"Authorization": "Basic abc123"}
+
+
+def test_basic_credentials_encode_latin1_like_btoa():
+    creds = BasicCredentials(username="josé", password="pass")
+    expected = base64.b64encode("josé:pass".encode("latin-1")).decode("ascii")
+    assert creds.authorization_headers == {"Authorization": f"Basic {expected}"}

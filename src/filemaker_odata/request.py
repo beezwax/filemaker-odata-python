@@ -62,7 +62,7 @@ class Request:
 
     def __init__(self, credentials: Credentials, client: Optional[httpx.Client] = None):
         self._credentials = credentials
-        self._client = client or httpx.Client()
+        self._client = client or httpx.Client(timeout=None)
 
     def get(self, url, *, headers=None, response_type="json") -> Response:
         return self._request("GET", url, None, headers, response_type)
@@ -71,7 +71,7 @@ class Request:
         return self._request("POST", url, body, headers, response_type)
 
     def _request(self, method, url, body, headers, response_type) -> Response:
-        merged = {**self._credentials.authorization_headers, **(headers or {})}
+        merged = {**(headers or {}), **self._credentials.authorization_headers}
         kwargs: dict[str, Any] = {"headers": merged}
         if body is not None:
             if isinstance(body, (str, bytes)):
@@ -85,4 +85,10 @@ class Request:
             raise RequestError(str(error), data=_safe_body(error.response)) from error
         except httpx.HTTPError as error:
             raise RequestError(str(error), data=None) from error
-        return Response(data=_parse(response, response_type), headers=response.headers)
+        try:
+            data = _parse(response, response_type)
+        except ValueError as error:  # json.JSONDecodeError subclasses ValueError
+            raise RequestError(
+                f"Failed to parse response body as JSON: {error}", data=response.text
+            ) from error
+        return Response(data=data, headers=response.headers)

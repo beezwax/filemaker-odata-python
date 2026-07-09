@@ -27,8 +27,10 @@ class BasicCredentials:
 
     @property
     def authorization_headers(self) -> dict[str, str]:
+        # Latin-1 to byte-match the TS reference implementation's btoa();
+        # FileMaker's Basic auth expects this encoding.
         token = base64.b64encode(
-            f"{self._username}:{self._password}".encode("utf-8")
+            f"{self._username}:{self._password}".encode("latin-1")
         ).decode("ascii")
         return {"Authorization": f"Basic {token}"}
 
