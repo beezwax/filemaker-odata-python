@@ -1,10 +1,8 @@
 # FileMaker OData (Python)
 
-A sync Python client for FileMaker's OData v4 API. Managed with [uv](https://docs.astral.sh/uv/).
+A Python client for FileMaker's OData v4 API.
 
 ## Install
-
-Installed straight from GitHub (not published to PyPI):
 
 ```bash
 uv add "git+https://github.com/beezwax/filemaker-odata-python"
@@ -16,14 +14,6 @@ Pin to a branch, tag, or commit for reproducible builds:
 uv add "git+https://github.com/beezwax/filemaker-odata-python@main"
 uv add "git+https://github.com/beezwax/filemaker-odata-python@v0.0.1"
 ```
-
-For a private repo, use the SSH form so uv uses your git credentials:
-
-```bash
-uv add "git+ssh://git@github.com/beezwax/filemaker-odata-python"
-```
-
-The distribution name is `filemaker-odata`; the import name is `filemaker_odata`.
 
 ## Usage
 
