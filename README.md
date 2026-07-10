@@ -71,6 +71,10 @@ results = (
 `with_basic_auth`, `with_oauth`, and OAuth discovery via `client.get_oauth_url(...)`
 and `client.get_auth_types()`.
 
+## API Reference
+
+Full method documentation is in [API.md](./API.md).
+
 ## Logging
 
 The library logs at DEBUG under the `filemaker_odata` logger and is silent by
