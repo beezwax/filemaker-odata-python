@@ -155,8 +155,7 @@ This also lets you run the flow against `localhost` during development. See the
 ### Self-signed certificates / custom HTTP client
 
 Some FileMaker servers use self-signed certificates. Pass a configured
-`httpx.Client` as `http_client` to control TLS verification, proxies, or timeouts
-(this is the analogue of the TS `agent` option):
+`httpx.Client` as `http_client` to control TLS verification, proxies, or timeouts:
 
 ```python
 import httpx
