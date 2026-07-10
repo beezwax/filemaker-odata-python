@@ -1,7 +1,7 @@
 """httpx-backed HTTP layer with pluggable credentials."""
 
 from dataclasses import dataclass
-from typing import Any, Mapping, Optional, Protocol, Union
+from typing import Any, Literal, Mapping, Optional, Protocol, Union
 
 import httpx
 
@@ -11,7 +11,7 @@ from filemaker_odata.errors import RequestError
 # Re-exported for callers that catch errors from this module.
 __all__ = ["Response", "Request", "RequestError", "RequestProtocol"]
 
-ResponseType = str  # one of: "json", "text", "bytes"
+ResponseType = Literal["json", "text", "bytes"]
 PostBody = Union[str, bytes, Mapping[str, Any], None]
 
 

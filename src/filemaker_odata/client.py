@@ -14,6 +14,7 @@ from filemaker_odata.credentials import (
 )
 from filemaker_odata.errors import FileMakerError
 from filemaker_odata.filemaker import FileMaker
+from filemaker_odata.operations.base import FileMakerConfig
 from filemaker_odata.request import Request
 
 
@@ -32,17 +33,18 @@ class FileMakerClient:
         http_client: Optional[httpx.Client] = None,
         logger: Optional[logging.Logger] = None,
     ):
-        self._server = server
-        self._database = database
+        self._config = FileMakerConfig(server=server, database=database)
         self._http_client = http_client
         self._logger = logger
 
     def url(self, path: str) -> str:
-        return f"https://{self._server}/fmi/odata/v4/{self._database}/{path}"
+        return self._config.url(path)
 
     def _make(self, credentials: Credentials) -> FileMaker:
         request = Request(credentials, client=self._http_client)
-        return FileMaker(self._server, self._database, request, logger=self._logger)
+        return FileMaker(
+            self._config.server, self._config.database, request, logger=self._logger
+        )
 
     def with_basic_auth(self, *, username: str, password: str) -> FileMaker:
         return self._make(BasicCredentials(username=username, password=password))
@@ -54,17 +56,18 @@ class FileMakerClient:
         self, *, tracking_id: str, provider: str, return_url: Optional[str] = None
     ) -> OAuthUrl:
         request = Request(NullCredentials(), client=self._http_client)
+        server = self._config.server
         url = (
-            f"https://{self._server}/oauth/getoauthurl"
+            f"https://{server}/oauth/getoauthurl"
             f"?trackingID={tracking_id}&provider={provider}"
-            f"&address={self._server}&X-FMS-OAuth-AuthType=2"
+            f"&address={server}&X-FMS-OAuth-AuthType=2"
         )
         response = request.get(
             url,
             headers={
                 "X-FMS-Application-Type": "9",
                 "X-FMS-Application-Version": "15",
-                "X-FMS-Return-URL": return_url or f"https://{self._server}/oauth-handler",
+                "X-FMS-Return-URL": return_url or f"https://{server}/oauth-handler",
             },
             response_type="text",
         )
@@ -78,7 +81,7 @@ class FileMakerClient:
     def get_auth_types(self) -> List[str]:
         request = Request(NullCredentials(), client=self._http_client)
         response = request.get(
-            f"https://{self._server}/fmws/oauthproviderinfo",
+            f"https://{self._config.server}/fmws/oauthproviderinfo",
             headers={"Content-Type": "application/json"},
         )
         payload = response.data.get("data")
