@@ -175,7 +175,35 @@ Full method documentation is in [API.md](./API.md).
 ## Logging
 
 The library logs at DEBUG under the `filemaker_odata` logger and is silent by
-default. Inject a custom `logging.Logger` via `FileMakerClient(..., logger=...)`.
+default. Pass any `logging.Logger` as `logger` to capture that output — for
+example, to write FileMaker debug logs to a file:
+
+```python
+import logging
+from filemaker_odata import FileMakerClient
+
+logger = logging.getLogger("my_app.filemaker")
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler("filemaker.log")
+handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+logger.addHandler(handler)
+
+client = FileMakerClient(
+    server="demo.server.beezwax.net",
+    database="test",
+    logger=logger,
+)
+```
+
+To enable the built-in logger instead of injecting your own, attach a handler to
+the `filemaker_odata` logger and set its level:
+
+```python
+import logging
+
+logging.getLogger("filemaker_odata").setLevel(logging.DEBUG)
+logging.basicConfig()  # send it to the console
+```
 
 ## Development
 
